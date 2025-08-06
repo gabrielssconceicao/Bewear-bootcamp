@@ -1,9 +1,41 @@
-import { Header } from "@/components/common/header";
+import Image from "next/image";
 
-export default function Home() {
+import { Header } from "@/components/common/header";
+import { ProductList } from "@/components/common/products-list";
+import { db } from "@/db";
+
+export default async function Home() {
+  const products = await db.query.productTable.findMany({
+    with: {
+      variants: true,
+    },
+  });
   return (
     <>
       <Header />
+      <div className="space-y-6">
+        <div className="px-5">
+          <Image
+            src="/banner-1.png"
+            alt="Levee uma vida com estilo"
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="h-auto w-full"
+          />
+        </div>
+        <ProductList title="Mais Vendidos" products={products} />
+        <div className="px-5">
+          <Image
+            src="/banner-2.png"
+            alt="Levee uma vida com estilo"
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="h-auto w-full"
+          />
+        </div>
+      </div>
     </>
   );
 }
