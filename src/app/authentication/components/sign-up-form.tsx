@@ -63,9 +63,7 @@ const SignUpForm = () => {
           toast.success("Conta criada com sucesso");
         },
         onError: (error) => {
-          if (
-            error.error.code === authClient.$ERROR_CODES.USER_ALREADY_EXISTS
-          ) {
+          if (error.error.code === "USER_ALREADY_EXISTS") {
             form.setError("email", {
               message: "Email já cadastrado",
             });
