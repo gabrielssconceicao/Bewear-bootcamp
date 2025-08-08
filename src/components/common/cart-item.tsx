@@ -9,7 +9,7 @@ interface CartItemProps {
   id: string;
   productName: string;
   productVariantName: string;
-  productVariantUrl: string;
+  productVariantImageUrl: string;
   productVariantPriceInCents: number;
   quantity: number;
 }
@@ -18,7 +18,7 @@ export function CartItem(props: CartItemProps) {
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
         <Image
-          src={props.productVariantUrl}
+          src={props.productVariantImageUrl}
           alt={props.productName}
           width={78}
           height={78}
