@@ -6,7 +6,6 @@ import { headers } from "next/headers";
 import { db } from "@/db";
 import { cartItemTable, cartTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { authClient } from "@/lib/auth-client";
 
 import { AddProductToCartSchema, addProductToCartSchema } from "./schema";
 
