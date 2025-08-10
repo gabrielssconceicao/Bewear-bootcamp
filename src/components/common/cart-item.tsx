@@ -3,6 +3,7 @@ import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 
+import { addProductToCart } from "@/actions/add-cart-product";
 import { decreaseCartProductQuantity } from "@/actions/drecrease-cart-quantity";
 import { removeProductFromCart } from "@/actions/remove-cart-product";
 import { formatCentsToBRL } from "@/helpers/money";
@@ -12,9 +13,11 @@ import { Button } from "../ui/button";
 interface CartItemProps {
   id: string;
   productName: string;
+  productVariantId: string;
   productVariantName: string;
   productVariantImageUrl: string;
   productVariantPriceInCents: number;
+
   quantity: number;
 }
 export function CartItem(props: CartItemProps) {
@@ -35,6 +38,15 @@ export function CartItem(props: CartItemProps) {
       }),
   });
 
+  const increaseCartProductQuantityMutation = useMutation({
+    mutationKey: ["increaseCartProduct"],
+    mutationFn: () =>
+      addProductToCart({
+        productVariantId: props.productVariantId,
+        quantity: 1,
+      }),
+  });
+
   const handleDeleteClick = () => {
     removeProductFromCartMutation.mutate(undefined, {
       onSuccess: () => {
@@ -46,8 +58,20 @@ export function CartItem(props: CartItemProps) {
       },
     });
   };
-  const handleDecreaseClick = () => {
+  const handleDecreaseQuantityClick = () => {
     decreaseCartProductQuantityMutation.mutate(undefined, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["cart"] });
+        toast.success("Quantidade alterada com sucesso");
+      },
+      onError: () => {
+        toast.error("Erro ao alterar quantidade do produto do carrinho");
+      },
+    });
+  };
+
+  const handleIncreaseQuantityClick = () => {
+    increaseCartProductQuantityMutation.mutate(undefined, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
         toast.success("Quantidade alterada com sucesso");
@@ -78,7 +102,7 @@ export function CartItem(props: CartItemProps) {
               className="h-4 w-4"
               variant={"ghost"}
               size={"icon"}
-              onClick={handleDecreaseClick}
+              onClick={handleDecreaseQuantityClick}
             >
               <MinusIcon />
             </Button>
@@ -87,7 +111,7 @@ export function CartItem(props: CartItemProps) {
               className="h-4 w-4"
               variant={"ghost"}
               size={"icon"}
-              onClick={() => {}}
+              onClick={handleIncreaseQuantityClick}
             >
               <PlusIcon />
             </Button>
