@@ -1,12 +1,11 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 
-import { addProductToCart } from "@/actions/add-cart-product";
-import { decreaseCartProductQuantity } from "@/actions/drecrease-cart-quantity";
-import { removeProductFromCart } from "@/actions/remove-cart-product";
 import { formatCentsToBRL } from "@/helpers/money";
+import { useDecreaseCartProduct } from "@/hooks/mutations/use-decrease-cart-product";
+import { useIncreaseCartProduct } from "@/hooks/mutations/use-increase-cart-product";
+import { useRemoveProductFromCart } from "@/hooks/mutations/use-remove-product-from-cart";
 
 import { Button } from "../ui/button";
 
@@ -21,36 +20,16 @@ interface CartItemProps {
   quantity: number;
 }
 export function CartItem(props: CartItemProps) {
-  const queryClient = useQueryClient();
-  const removeProductFromCartMutation = useMutation({
-    mutationKey: ["removeProductFromCart"],
-    mutationFn: () =>
-      removeProductFromCart({
-        cartItemId: props.id,
-      }),
-  });
+  const removeProductFromCartMutation = useRemoveProductFromCart(props.id);
 
-  const decreaseCartProductQuantityMutation = useMutation({
-    mutationKey: ["decreaseCartProduct"],
-    mutationFn: () =>
-      decreaseCartProductQuantity({
-        cartItemId: props.id,
-      }),
-  });
+  const decreaseCartProductQuantityMutation = useDecreaseCartProduct(props.id);
 
-  const increaseCartProductQuantityMutation = useMutation({
-    mutationKey: ["increaseCartProduct"],
-    mutationFn: () =>
-      addProductToCart({
-        productVariantId: props.productVariantId,
-        quantity: 1,
-      }),
-  });
-
+  const increaseCartProductQuantityMutation = useIncreaseCartProduct(
+    props.productVariantId,
+  );
   const handleDeleteClick = () => {
     removeProductFromCartMutation.mutate(undefined, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["cart"] });
         toast.success("Produto removido do carrinho");
       },
       onError: () => {
@@ -61,7 +40,6 @@ export function CartItem(props: CartItemProps) {
   const handleDecreaseQuantityClick = () => {
     decreaseCartProductQuantityMutation.mutate(undefined, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["cart"] });
         toast.success("Quantidade alterada com sucesso");
       },
       onError: () => {
@@ -73,7 +51,6 @@ export function CartItem(props: CartItemProps) {
   const handleIncreaseQuantityClick = () => {
     increaseCartProductQuantityMutation.mutate(undefined, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["cart"] });
         toast.success("Quantidade alterada com sucesso");
       },
       onError: () => {
