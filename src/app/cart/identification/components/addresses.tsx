@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
+import { toast } from "sonner";
 import z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
 
 const formSchema = z.object({
   email: z.email("E-mail inválido"),
@@ -39,6 +41,7 @@ type FormValues = z.infer<typeof formSchema>;
 export const Addresses = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
 
+  const createShippingAddressMutation = useCreateShippingAddress();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,7 +60,13 @@ export const Addresses = () => {
   });
 
   const onSubmit = async (values: FormValues) => {
-    console.log(values);
+    try {
+      await createShippingAddressMutation.mutateAsync(values);
+      toast.success("Endereço criado com sucesso");
+      setSelectedAddress(null);
+    } catch (error) {
+      toast.error("Erro ao criar endereço");
+    }
   };
 
   return (
@@ -260,8 +269,14 @@ export const Addresses = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
-                Salvar endereço
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={createShippingAddressMutation.isPending}
+              >
+                {createShippingAddressMutation.isPending
+                  ? "Salvando..."
+                  : "Salvar endereço"}
               </Button>
             </form>
           </Form>
