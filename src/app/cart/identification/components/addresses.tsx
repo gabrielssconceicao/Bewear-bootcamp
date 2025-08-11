@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
@@ -22,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { shippingAddressTable } from "@/db/schema";
 import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
+import { useUpdateCartShippingAddress } from "@/hooks/mutations/use-update-cart-shipping-address";
 import { useUserAddresses } from "@/hooks/queries/use-user-addresses";
 
 import { formatAddress } from "../../helpers/address";
@@ -44,15 +46,23 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface AddressesProps {
   shippingAddresses: (typeof shippingAddressTable.$inferSelect)[];
+  defaultShippingAddressId: string | null;
 }
 
-export const Addresses = ({ shippingAddresses }: AddressesProps) => {
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
-
+export const Addresses = ({
+  shippingAddresses,
+  defaultShippingAddressId,
+}: AddressesProps) => {
+  const router = useRouter();
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(
+    defaultShippingAddressId || null,
+  );
   const createShippingAddressMutation = useCreateShippingAddress();
+  const updateCartShippingAddressMutation = useUpdateCartShippingAddress();
   const { data: addresses, isLoading } = useUserAddresses({
     initialData: shippingAddresses,
   });
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -72,11 +82,34 @@ export const Addresses = ({ shippingAddresses }: AddressesProps) => {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      await createShippingAddressMutation.mutateAsync(values);
-      toast.success("Endereço criado com sucesso");
-      setSelectedAddress(null);
-    } catch {
-      toast.error("Erro ao criar endereço");
+      const newAddress =
+        await createShippingAddressMutation.mutateAsync(values);
+      toast.success("Endereço criado com sucesso!");
+      form.reset();
+      setSelectedAddress(newAddress.id);
+
+      await updateCartShippingAddressMutation.mutateAsync({
+        shippingAddressId: newAddress.id,
+      });
+      toast.success("Endereço vinculado ao carrinho!");
+    } catch (error) {
+      toast.error("Erro ao criar endereço. Tente novamente.");
+      console.error(error);
+    }
+  };
+
+  const handleGoToPayment = async () => {
+    if (!selectedAddress || selectedAddress === "add_new") return;
+
+    try {
+      await updateCartShippingAddressMutation.mutateAsync({
+        shippingAddressId: selectedAddress,
+      });
+      toast.success("Endereço selecionado para entrega!");
+      router.push("/cart/confirmation");
+    } catch (error) {
+      toast.error("Erro ao selecionar endereço. Tente novamente.");
+      console.error(error);
     }
   };
 
@@ -129,6 +162,20 @@ export const Addresses = ({ shippingAddresses }: AddressesProps) => {
               </CardContent>
             </Card>
           </RadioGroup>
+        )}
+
+        {selectedAddress && selectedAddress !== "add_new" && (
+          <div className="mt-4">
+            <Button
+              onClick={handleGoToPayment}
+              className="w-full"
+              disabled={updateCartShippingAddressMutation.isPending}
+            >
+              {updateCartShippingAddressMutation.isPending
+                ? "Processando..."
+                : "Ir para pagamento"}
+            </Button>
+          </div>
         )}
 
         {selectedAddress === "add_new" && (
@@ -317,9 +364,13 @@ export const Addresses = ({ shippingAddresses }: AddressesProps) => {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={createShippingAddressMutation.isPending}
+                disabled={
+                  createShippingAddressMutation.isPending ||
+                  updateCartShippingAddressMutation.isPending
+                }
               >
-                {createShippingAddressMutation.isPending
+                {createShippingAddressMutation.isPending ||
+                updateCartShippingAddressMutation.isPending
                   ? "Salvando..."
                   : "Salvar endereço"}
               </Button>
