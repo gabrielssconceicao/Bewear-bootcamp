@@ -7,12 +7,12 @@ import { cartTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 export const getCart = async () => {
-  const session = await auth.api.getSession({ headers: await headers() });
-
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session?.user) {
     throw new Error("Unauthorized");
   }
-
   const cart = await db.query.cartTable.findFirst({
     where: (cart, { eq }) => eq(cart.userId, session.user.id),
     with: {
@@ -28,7 +28,6 @@ export const getCart = async () => {
       },
     },
   });
-
   if (!cart) {
     const [newCart] = await db
       .insert(cartTable)
@@ -36,7 +35,6 @@ export const getCart = async () => {
         userId: session.user.id,
       })
       .returning();
-
     return {
       ...newCart,
       items: [],
@@ -44,7 +42,6 @@ export const getCart = async () => {
       shippingAddress: null,
     };
   }
-
   return {
     ...cart,
     totalPriceInCents: cart.items.reduce(

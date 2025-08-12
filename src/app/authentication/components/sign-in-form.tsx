@@ -1,4 +1,5 @@
 "use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -26,8 +27,8 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 
 const formSchema = z.object({
-  email: z.email("E-mail inválido"),
-  password: z.string("Senha inválida").min(8, "Senha inválida"),
+  email: z.email("E-mail inválido!"),
+  password: z.string("Senha inválida!").min(8, "Senha inválida!"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -42,22 +43,29 @@ const SignInForm = () => {
     },
   });
 
-  async function onSubmit(data: FormValues) {
+  async function onSubmit(values: FormValues) {
     await authClient.signIn.email({
-      email: data.email,
-      password: data.password,
+      email: values.email,
+      password: values.password,
       fetchOptions: {
         onSuccess: () => {
           router.push("/");
         },
         onError: (ctx) => {
-          if (ctx.error.code === "INVALID_EMAIL_OR_PASSWORD") {
-            toast.error("Email ou senha inválidos");
-            form.setError("email", { message: "Email ou senha inválidos" });
-          }
           if (ctx.error.code === "USER_NOT_FOUND") {
-            toast.error("E-mail não encontrado");
-            form.setError("email", { message: "E-mail não encontrado" });
+            toast.error("E-mail não encontrado.");
+            return form.setError("email", {
+              message: "E-mail não encontrado.",
+            });
+          }
+          if (ctx.error.code === "INVALID_EMAIL_OR_PASSWORD") {
+            toast.error("E-mail ou senha inválidos.");
+            form.setError("password", {
+              message: "E-mail ou senha inválidos.",
+            });
+            return form.setError("email", {
+              message: "E-mail ou senha inválidos.",
+            });
           }
           toast.error(ctx.error.message);
         },
@@ -74,9 +82,10 @@ const SignInForm = () => {
     <>
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
+          <CardTitle>Entrar</CardTitle>
           <CardDescription>Faça login para continuar.</CardDescription>
         </CardHeader>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <CardContent className="grid gap-6">
@@ -98,12 +107,12 @@ const SignInForm = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Senha</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Digite sua senha"
-                        {...field}
                         type="password"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -116,10 +125,10 @@ const SignInForm = () => {
                 Entrar
               </Button>
               <Button
-                type="button"
-                variant={"outline"}
+                variant="outline"
                 className="w-full"
                 onClick={handleSignInWithGoogle}
+                type="button"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4">
                   <path

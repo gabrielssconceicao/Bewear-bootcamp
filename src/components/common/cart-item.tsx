@@ -16,45 +16,43 @@ interface CartItemProps {
   productVariantName: string;
   productVariantImageUrl: string;
   productVariantPriceInCents: number;
-
   quantity: number;
 }
-export function CartItem(props: CartItemProps) {
-  const removeProductFromCartMutation = useRemoveProductFromCart(props.id);
 
-  const decreaseCartProductQuantityMutation = useDecreaseCartProduct(props.id);
-
-  const increaseCartProductQuantityMutation = useIncreaseCartProduct(
-    props.productVariantId,
-  );
+const CartItem = ({
+  id,
+  productName,
+  productVariantId,
+  productVariantName,
+  productVariantImageUrl,
+  productVariantPriceInCents,
+  quantity,
+}: CartItemProps) => {
+  const removeProductFromCartMutation = useRemoveProductFromCart(id);
+  const decreaseCartProductQuantityMutation = useDecreaseCartProduct(id);
+  const increaseCartProductQuantityMutation =
+    useIncreaseCartProduct(productVariantId);
   const handleDeleteClick = () => {
     removeProductFromCartMutation.mutate(undefined, {
       onSuccess: () => {
-        toast.success("Produto removido do carrinho");
+        toast.success("Produto removido do carrinho.");
       },
       onError: () => {
-        toast.error("Erro ao remover produto do carrinho");
+        toast.error("Erro ao remover produto do carrinho.");
       },
     });
   };
   const handleDecreaseQuantityClick = () => {
     decreaseCartProductQuantityMutation.mutate(undefined, {
       onSuccess: () => {
-        toast.success("Quantidade alterada com sucesso");
-      },
-      onError: () => {
-        toast.error("Erro ao alterar quantidade do produto do carrinho");
+        toast.success("Quantidade do produto diminuida.");
       },
     });
   };
-
   const handleIncreaseQuantityClick = () => {
     increaseCartProductQuantityMutation.mutate(undefined, {
       onSuccess: () => {
-        toast.success("Quantidade alterada com sucesso");
-      },
-      onError: () => {
-        toast.error("Erro ao alterar quantidade do produto do carrinho");
+        toast.success("Quantidade do produto aumentada.");
       },
     });
   };
@@ -62,32 +60,29 @@ export function CartItem(props: CartItemProps) {
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
         <Image
-          src={props.productVariantImageUrl}
-          alt={props.productName}
+          src={productVariantImageUrl}
+          alt={productVariantName}
           width={78}
           height={78}
           className="rounded-lg"
         />
         <div className="flex flex-col gap-1">
-          <p className="text-xs font-semibold">{props.productName}</p>
+          <p className="text-sm font-semibold">{productName}</p>
           <p className="text-muted-foreground text-xs font-medium">
-            {props.productVariantName}
+            {productVariantName}
           </p>
-
-          <div className="flex w-24 items-center justify-between rounded-lg border p-1">
+          <div className="flex w-[100px] items-center justify-between rounded-lg border p-1">
             <Button
               className="h-4 w-4"
-              variant={"ghost"}
-              size={"icon"}
+              variant="ghost"
               onClick={handleDecreaseQuantityClick}
             >
               <MinusIcon />
             </Button>
-            <p className="text-xs font-medium">{props.quantity}</p>
+            <p className="text-xs font-medium">{quantity}</p>
             <Button
               className="h-4 w-4"
-              variant={"ghost"}
-              size={"icon"}
+              variant="ghost"
               onClick={handleIncreaseQuantityClick}
             >
               <PlusIcon />
@@ -95,14 +90,16 @@ export function CartItem(props: CartItemProps) {
           </div>
         </div>
       </div>
-      <div className="flex flex-col items-end justify-center gap-1">
-        <Button variant={"outline"} size={"icon"} onClick={handleDeleteClick}>
+      <div className="flex flex-col items-end justify-center gap-2">
+        <Button variant="outline" size="icon" onClick={handleDeleteClick}>
           <TrashIcon />
         </Button>
         <p className="text-sm font-bold">
-          {formatCentsToBRL(props.productVariantPriceInCents)}
+          {formatCentsToBRL(productVariantPriceInCents)}
         </p>
       </div>
     </div>
   );
-}
+};
+
+export default CartItem;

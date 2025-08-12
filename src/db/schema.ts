@@ -65,7 +65,7 @@ export const accountTable = pgTable("account", {
   updatedAt: timestamp("updated_at").notNull(),
 });
 
-export const verification = pgTable("verification", {
+export const verificationTable = pgTable("verification", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
@@ -218,7 +218,7 @@ export const cartItemRelations = relations(cartItemTable, ({ one }) => ({
 export const orderStatus = pgEnum("order_status", [
   "pending",
   "paid",
-  "cancelled",
+  "canceled",
 ]);
 
 export const orderTable = pgTable("order", {
@@ -226,7 +226,7 @@ export const orderTable = pgTable("order", {
   userId: text("user_id")
     .notNull()
     .references(() => userTable.id, { onDelete: "cascade" }),
-  shippingAddress: uuid("shipping_address_relationship_id")
+  shippingAddressId: uuid("shipping_address_id")
     .notNull()
     .references(() => shippingAddressTable.id, { onDelete: "set null" }),
   recipientName: text().notNull(),
@@ -252,7 +252,7 @@ export const orderRelations = relations(orderTable, ({ one, many }) => ({
     references: [userTable.id],
   }),
   shippingAddress: one(shippingAddressTable, {
-    fields: [orderTable.shippingAddress],
+    fields: [orderTable.shippingAddressId],
     references: [shippingAddressTable.id],
   }),
   items: many(orderItemTable),

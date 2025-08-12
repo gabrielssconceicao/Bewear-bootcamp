@@ -1,4 +1,5 @@
 "use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -27,61 +28,68 @@ import { authClient } from "@/lib/auth-client";
 
 const formSchema = z
   .object({
-    name: z.string("Nome inválido").trim().min(1, "Nome é obrigatorio"),
-    email: z.email("E-mail inválido"),
-    password: z.string("Senha inválida").min(8, "Senha inválida"),
-    passwordConfirmation: z.string("Senha inválida").min(8, "Senha inválida"),
+    name: z.string("Nome inválido.").trim().min(1, "Nome é obrigatório."),
+    email: z.email("E-mail inválido."),
+    password: z.string("Senha inválida.").min(8, "Senha inválida."),
+    passwordConfirmation: z.string("Senha inválida.").min(8, "Senha inválida."),
   })
-  .refine((data) => data.password === data.passwordConfirmation, {
-    error: "As senhas não coincidem",
-    path: ["passwordConfirmation"],
-  });
+  .refine(
+    (data) => {
+      return data.password === data.passwordConfirmation;
+    },
+    {
+      error: "As senhas não coincidem.",
+      path: ["passwordConfirmation"],
+    },
+  );
 
 type FormValues = z.infer<typeof formSchema>;
 
 const SignUpForm = () => {
+  const router = useRouter();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
-      name: "",
       passwordConfirmation: "",
     },
   });
 
-  const router = useRouter();
-
   async function onSubmit(values: FormValues) {
-    const { data, error } = await authClient.signUp.email({
+    await authClient.signUp.email({
+      name: values.name,
       email: values.email,
       password: values.password,
-      name: values.name,
       fetchOptions: {
         onSuccess: () => {
           router.push("/");
-          toast.success("Conta criada com sucesso");
         },
         onError: (error) => {
           if (error.error.code === "USER_ALREADY_EXISTS") {
-            form.setError("email", {
-              message: "Email já cadastrado",
+            toast.error("E-mail já cadastrado.");
+            return form.setError("email", {
+              message: "E-mail já cadastrado.",
             });
           }
+          toast.error(error.error.message);
         },
       },
     });
   }
+
   return (
     <>
-      <Card>
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Criar conta</CardTitle>
-          <CardDescription>Crie uma conta para continuar</CardDescription>
+          <CardDescription>Crie uma conta para continuar.</CardDescription>
         </CardHeader>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <CardContent className="grid gap-6">
+            <CardContent className="grid w-full gap-6">
               <FormField
                 control={form.control}
                 name="name"
@@ -113,12 +121,12 @@ const SignUpForm = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Senha</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Digite sua senha"
-                        {...field}
                         type="password"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -130,12 +138,12 @@ const SignUpForm = () => {
                 name="passwordConfirmation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirmar Senha</FormLabel>
+                    <FormLabel>Confirmar senha</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Digite sua senha novamente"
-                        {...field}
+                        placeholder="Digite a sua senha novamente"
                         type="password"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -144,7 +152,7 @@ const SignUpForm = () => {
               />
             </CardContent>
             <CardFooter>
-              <Button type="submit">Entrar</Button>
+              <Button type="submit">Criar conta</Button>
             </CardFooter>
           </form>
         </Form>

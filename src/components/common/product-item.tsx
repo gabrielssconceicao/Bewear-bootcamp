@@ -11,10 +11,8 @@ interface ProductItemProps {
   };
   textContainerClassName?: string;
 }
-export function ProductItem({
-  product,
-  textContainerClassName,
-}: ProductItemProps) {
+
+const ProductItem = ({ product, textContainerClassName }: ProductItemProps) => {
   const firstVariant = product.variants[0];
   return (
     <Link
@@ -25,13 +23,13 @@ export function ProductItem({
         src={firstVariant.imageUrl}
         alt={firstVariant.name}
         sizes="100vw"
-        width={0}
         height={0}
+        width={0}
         className="h-auto w-full rounded-3xl"
       />
       <div
         className={cn(
-          "flex max-w-[150px] flex-col gap-1",
+          "flex max-w-[200px] flex-col gap-1",
           textContainerClassName,
         )}
       >
@@ -45,4 +43,6 @@ export function ProductItem({
       </div>
     </Link>
   );
-}
+};
+
+export default ProductItem;

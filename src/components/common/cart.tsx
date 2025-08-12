@@ -16,7 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet";
-import { CartItem } from "./cart-item";
+import CartItem from "./cart-item";
 
 export const Cart = () => {
   const { data: cart } = useCart();
@@ -40,8 +40,8 @@ export const Cart = () => {
                   <CartItem
                     key={item.id}
                     id={item.id}
-                    productName={item.productVariant.product.name}
                     productVariantId={item.productVariant.id}
+                    productName={item.productVariant.product.name}
                     productVariantName={item.productVariant.name}
                     productVariantImageUrl={item.productVariant.imageUrl}
                     productVariantPriceInCents={
@@ -78,7 +78,7 @@ export const Cart = () => {
               </div>
 
               <Button className="mt-5 rounded-full" asChild>
-                <Link href={"/cart/identification"}>Finalizar compra</Link>
+                <Link href="/cart/identification">Finalizar compra</Link>
               </Button>
             </div>
           )}
@@ -87,3 +87,5 @@ export const Cart = () => {
     </Sheet>
   );
 };
+
+// SERVER ACTION

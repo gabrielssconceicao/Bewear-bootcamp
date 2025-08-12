@@ -1,7 +1,8 @@
-import { Separator } from "@radix-ui/react-separator";
 import Image from "next/image";
+import React from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { formatCentsToBRL } from "@/helpers/money";
 
 interface CartSummaryProps {
@@ -17,11 +18,11 @@ interface CartSummaryProps {
   }>;
 }
 
-export function CartSummary({
+const CartSummary = ({
   subtotalInCents,
   totalInCents,
   products,
-}: CartSummaryProps) {
+}: CartSummaryProps) => {
   return (
     <Card>
       <CardHeader>
@@ -76,4 +77,6 @@ export function CartSummary({
       </CardContent>
     </Card>
   );
-}
+};
+
+export default CartSummary;
