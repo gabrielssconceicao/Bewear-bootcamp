@@ -33,6 +33,7 @@ export const POST = async (request: Request) => {
         status: "paid",
       })
       .where(eq(orderTable.id, orderId));
+    // desafio apagar o carrinho só depeois de pagar o pedido
   }
   return NextResponse.json({ received: true });
 };
